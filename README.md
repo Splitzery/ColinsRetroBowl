@@ -1,1 +1,1 @@
-# ColinsRetroBowl
+# retro-bowl-college
