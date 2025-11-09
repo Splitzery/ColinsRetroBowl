@@ -115,6 +115,40 @@
     </div>
 
     <!-- Run the game code -->
+    <!-- Touch init for laptop/tablet touchscreens: tracks touch counts for second-finger tap detection -->
+    <script>
+        (function () {
+            try {
+                if (typeof window !== 'undefined' && !window.__gmlTouchInit) {
+                    window.__gmlTouchPoints = 0;
+                    window.__gmlTouchPrevPoints = 0;
+                    window.addEventListener && window.addEventListener('touchstart', function (e) {
+                        try {
+                            window.__gmlTouchPrevPoints = window.__gmlTouchPoints; window.__gmlTouchPoints = e.touches ? e.touches.length : 1;
+                            // If a second finger appears while touching (two-finger tap), synthesize a right-click
+                            // on the canvas so the game can detect a secondary tap to toggle bullet throw.
+                            if ((e.touches ? e.touches.length : 0) === 2) {
+                                try {
+                                    var cvs = document.getElementById('canvas');
+                                    if (cvs) {
+                                        var down = new MouseEvent('mousedown', { bubbles: true, cancelable: true, view: window, button: 2 });
+                                        var up = new MouseEvent('mouseup', { bubbles: true, cancelable: true, view: window, button: 2 });
+                                        cvs.dispatchEvent(down);
+                                        // small delay to simulate real click
+                                        setTimeout(function () { try { cvs.dispatchEvent(up); } catch (err) {} }, 10);
+                                    }
+                                } catch (err) {}
+                            }
+                        } catch (err) {}
+                    }, { passive: true });
+                    window.addEventListener && window.addEventListener('touchend', function (e) {
+                        try { window.__gmlTouchPrevPoints = window.__gmlTouchPoints; window.__gmlTouchPoints = e.touches ? e.touches.length : 0; } catch (err) {}
+                    }, { passive: true });
+                    window.__gmlTouchInit = true;
+                }
+            } catch (e) {}
+        })();
+    </script>
     <script type="text/javascript" src="html5game/RetroBowl.js"></script>
 
     <!-- Builtin injector for injecting runner path -->
